@@ -19,11 +19,11 @@ def read_root():
 @app.get("/health")
 def health_check():
     # health checking database connection (mocked for this example)
-    return 
-    {
-        "status": "healthy", "version": "v2", "message": "Live GitOps Deployment Success!"
+    return {
+        "status": "healthy", 
+        "version": "v2", 
+        "message": "Live GitOps Deployment Success!"
     }
-
 @app.get("/api/v1/data")
 def get_data():
     return {
