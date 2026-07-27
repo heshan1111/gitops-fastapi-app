@@ -8,13 +8,14 @@ and loads all API routes.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.config.settings import settings
 
 from app.routes.api import router
 
 # Create FastAPI application
 app = FastAPI(
-    title="Production GitOps API",
-    version="1.0.0",
+    title=settings.APP_NAME,
+    version=settings.APP_VERSION,
     description="Real-world DevOps journey backend setup"
 )
 
