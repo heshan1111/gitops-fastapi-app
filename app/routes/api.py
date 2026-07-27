@@ -9,6 +9,7 @@ cleaner and easier to maintain as it grows.
 
 from fastapi import APIRouter
 from app.config.settings import settings
+from app.services import api_service
 
 # Create a router object
 router = APIRouter()
@@ -17,18 +18,10 @@ router = APIRouter()
 @router.get("/")
 def read_root():
     """
-    Root endpoint.
-
-    Used to verify that the API is running.
-    Returns the current deployment environment.
+    Home endpoint.
     """
 
-    return {
-        "status": "Success",
-        "message": "Welcome to the Production GitOps Pipeline API!",
-        "environment": settings.ENVIRONMENT
-    }
-
+    return api_service.get_home()
 
 @router.get("/health")
 def health_check():
@@ -39,11 +32,7 @@ def health_check():
     to verify that the application is healthy.
     """
 
-    return {
-        "status": "healthy",
-        "version": "v2.0",
-        "message": "Live GitOps Deployment Success!"
-    }
+    return api_service.get_health()
 
 
 @router.get("/api/v1/data")
@@ -54,19 +43,4 @@ def get_data():
     Later this data will come from PostgreSQL.
     """
 
-    return {
-        "data": [
-            {
-                "id": 1,
-                "item": "DevOps Core Principles"
-            },
-            {
-                "id": 2,
-                "item": "GitOps Automation with ArgoCD"
-            },
-            {
-                "id": 3,
-                "item": "Infrastructure as Code"
-            }
-        ]
-    }
+    return api_service.get_learning_data()
