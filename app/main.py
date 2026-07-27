@@ -8,7 +8,9 @@ and loads all API routes.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.config.settings import settings
+from app.config.logger import logger
 
 from app.routes.api import router
 
@@ -34,3 +36,8 @@ app.add_middleware(
 
 # Register all API routes
 app.include_router(router)
+
+# Log that the application has started successfully
+logger.info(
+    f"{settings.APP_NAME} started successfully in {settings.ENVIRONMENT} environment."
+)
