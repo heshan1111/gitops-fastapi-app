@@ -10,6 +10,8 @@ and verifies the database connection at startup.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+from app.config.database import Base, engine
+import app.models
 
 from app.config.settings import settings
 from app.config.logger import logger
@@ -29,14 +31,16 @@ app = FastAPI(
 @app.on_event("startup")
 def startup_event():
     try:
+        Base.metadata.create_all(bind=engine)
+
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
 
         logger.info("Connected to PostgreSQL successfully.")
+        logger.info("Database tables created successfully.")
 
     except Exception as e:
         logger.error(f"Database connection failed: {e}")
-
 
 # Enable Cross-Origin Resource Sharing (CORS)
 app.add_middleware(
