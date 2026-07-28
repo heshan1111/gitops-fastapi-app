@@ -15,21 +15,17 @@ load_dotenv()
 
 
 class Settings:
-    """
-    Central application settings.
-    """
-
-    # Application information
     APP_NAME = os.getenv("APP_NAME", "Production GitOps API")
     APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
     ENVIRONMENT = os.getenv("ENVIRONMENT", "Development")
 
-    # Logging
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
-    # Database (used later)
-    DATABASE_URL = os.getenv("DATABASE_URL")
-
+    DATABASE_HOST = os.getenv("DATABASE_HOST")
+    DATABASE_PORT = os.getenv("DATABASE_PORT")
+    DATABASE_NAME = os.getenv("DATABASE_NAME")
+    DATABASE_USER = os.getenv("DATABASE_USER")
+    DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 
 # Single shared settings object
 settings = Settings()
