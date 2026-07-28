@@ -15,7 +15,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from app.dependencies.database import get_db
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserUpdate, UserResponse
 from app.services.api_service import create_user
 
 # Create a router object
@@ -63,6 +63,7 @@ def create_new_user(
 ):
     return create_user(db, user)
 
+
 @router.get(
     "/users",
     response_model=list[UserResponse],
@@ -71,3 +72,31 @@ def read_users(
     db: Session = Depends(get_db),
 ):
     return api_service.get_users(db)
+
+@router.get(
+    "/users/{user_id}",
+    response_model=UserResponse,
+)
+def read_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+):
+    return api_service.get_user_by_id(db, user_id)
+
+@router.put(
+    "/users/{user_id}",
+    response_model=UserResponse,
+)
+def update_existing_user(
+    user_id: int,
+    user: UserUpdate,
+    db: Session = Depends(get_db),
+):
+    return api_service.update_user(db, user_id, user)
+
+@router.delete("/users/{user_id}")
+def delete_existing_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+):
+    return api_service.delete_user(db, user_id)
