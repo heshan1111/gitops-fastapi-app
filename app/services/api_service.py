@@ -14,6 +14,7 @@ from app.models.user import User
 from app.schemas.user import UserCreate
 from fastapi import HTTPException
 from app.schemas.user import UserUpdate
+from typing import List
 
 
 def get_home():
@@ -61,24 +62,19 @@ def get_learning_data():
         ]
     }
 
+from app.repositories import user_repository
+
+
 def create_user(db: Session, user: UserCreate):
-    db_user = User(
-        name=user.name,
-        email=user.email,
-    )
+    return user_repository.create(db, user)
 
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-
-    return db_user
-
-    from typing import List
+    
 
 def get_users(db: Session) -> list[User]:
+
     logger.info("Fetching all users.")
 
-    users = db.query(User).all()
+    users = user_repository.get_all(db)
 
     logger.info(f"Retrieved {len(users)} user(s).")
 
@@ -86,9 +82,10 @@ def get_users(db: Session) -> list[User]:
 
 
 def get_user_by_id(db: Session, user_id: int) -> User:
+
     logger.info(f"Fetching user with ID: {user_id}")
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user = user_repository.get_by_id(db, user_id)
 
     if user is None:
         logger.warning(f"User with ID {user_id} not found.")
@@ -109,7 +106,7 @@ def update_user(
 
     logger.info(f"Updating user with ID: {user_id}")
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user = user_repository.get_by_id(db, user_id)
 
     if user is None:
         logger.warning(f"User with ID {user_id} not found.")
@@ -119,22 +116,22 @@ def update_user(
             detail="User not found",
         )
 
-    user.name = updated_user.name
-    user.email = updated_user.email
-
-    db.commit()
-    db.refresh(user)
+    updated = user_repository.update(
+        db,
+        user,
+        updated_user,
+    )
 
     logger.info(f"User with ID {user_id} updated successfully.")
 
-    return user
+    return updated
 
 
 def delete_user(db: Session, user_id: int):
 
     logger.info(f"Deleting user with ID: {user_id}")
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user = user_repository.get_by_id(db, user_id)
 
     if user is None:
         logger.warning(f"User with ID {user_id} not found.")
@@ -144,8 +141,7 @@ def delete_user(db: Session, user_id: int):
             detail="User not found",
         )
 
-    db.delete(user)
-    db.commit()
+    user_repository.delete(db, user)
 
     logger.info(f"User with ID {user_id} deleted successfully.")
 
