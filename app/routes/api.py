@@ -11,6 +11,13 @@ from fastapi import APIRouter
 from app.config.settings import settings
 from app.services import api_service
 
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from app.dependencies.database import get_db
+from app.schemas.user import UserCreate, UserResponse
+from app.services.api_service import create_user
+
 # Create a router object
 router = APIRouter()
 
@@ -44,3 +51,23 @@ def get_data():
     """
 
     return api_service.get_learning_data()
+
+@router.post(
+    "/users",
+    response_model=UserResponse,
+    status_code=201,
+)
+def create_new_user(
+    user: UserCreate,
+    db: Session = Depends(get_db),
+):
+    return create_user(db, user)
+
+@router.get(
+    "/users",
+    response_model=list[UserResponse],
+)
+def read_users(
+    db: Session = Depends(get_db),
+):
+    return api_service.get_users(db)
