@@ -10,12 +10,10 @@ and verifies the database connection at startup.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
-from app.config.database import Base, engine
-import app.models
+from app.config.database import  engine
 
 from app.config.settings import settings
 from app.config.logger import logger
-from app.config.database import engine
 
 from app.routes.api import router
 
@@ -31,13 +29,10 @@ app = FastAPI(
 @app.on_event("startup")
 def startup_event():
     try:
-        Base.metadata.create_all(bind=engine)
-
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
 
         logger.info("Connected to PostgreSQL successfully.")
-        logger.info("Database tables created successfully.")
 
     except Exception as e:
         logger.error(f"Database connection failed: {e}")
@@ -62,3 +57,4 @@ app.include_router(router)
 logger.info(
     f"{settings.APP_NAME} started successfully in {settings.ENVIRONMENT} environment."
 )
+#heshan
