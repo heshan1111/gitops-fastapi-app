@@ -15,6 +15,7 @@ from app.schemas.user import UserCreate
 from fastapi import HTTPException
 from app.schemas.user import UserUpdate
 from typing import List
+from app.services.auth_service import AuthService
 
 
 def get_home():
@@ -65,8 +66,43 @@ def get_learning_data():
 from app.repositories import user_repository
 
 
-def create_user(db: Session, user: UserCreate):
-    return user_repository.create(db, user)
+def create_user(
+    db: Session,
+    user: UserCreate,
+):
+
+    logger.info(f"Creating user with email: {user.email}")
+
+    existing_user = user_repository.get_by_email(
+        db,
+        user.email,
+    )
+
+    if existing_user:
+        logger.warning(
+            f"User already exists: {user.email}"
+        )
+
+        raise HTTPException(
+            status_code=400,
+            detail="Email already registered",
+        )
+
+    hashed_password = AuthService.hash_password(
+        user.password
+    )
+
+    created_user = user_repository.create(
+        db=db,
+        user=user,
+        hashed_password=hashed_password,
+    )
+
+    logger.info(
+        f"User created successfully: {created_user.email}"
+    )
+
+    return created_user
 
     
 

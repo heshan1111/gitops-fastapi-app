@@ -1,23 +1,19 @@
 """
 Application Entry Point
-
-This file creates the FastAPI application,
-registers middleware,
-loads API routes,
-and verifies the database connection at startup.
 """
+
+import time
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
-from app.config.database import  engine
 
+from app.config.database import engine
 from app.config.settings import settings
 from app.config.logger import logger
-
 from app.routes.api import router
 
-# Create FastAPI applicationggit 
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
@@ -25,36 +21,37 @@ app = FastAPI(
 )
 
 
-# Verify database connection when the application starts
 @app.on_event("startup")
 def startup_event():
-    try:
-        with engine.connect() as connection:
-            connection.execute(text("SELECT 1"))
 
-        logger.info("Connected to PostgreSQL successfully.")
+    for attempt in range(10):
+        try:
+            with engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
 
-    except Exception as e:
-        logger.error(f"Database connection failed: {e}")
+            logger.info("Connected to PostgreSQL successfully.")
+            return
 
-# Enable Cross-Origin Resource Sharing (CORS)
+        except Exception as e:
+            logger.warning(
+                f"Waiting for PostgreSQL... ({attempt + 1}/10)"
+            )
+            logger.warning(str(e))
+            time.sleep(3)
+
+    raise RuntimeError("Could not connect to PostgreSQL")
+
+
 app.add_middleware(
     CORSMiddleware,
-
-    # Allow frontend applications to access the API.
-    # Replace "*" with your frontend domain in production.
     allow_origins=["*"],
-
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Register all API routes
 app.include_router(router)
 
-# Log application startup
 logger.info(
     f"{settings.APP_NAME} started successfully in {settings.ENVIRONMENT} environment."
 )
-#heshan
