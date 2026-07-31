@@ -15,7 +15,8 @@ from app.schemas.user import UserCreate
 from fastapi import HTTPException
 from app.schemas.user import UserUpdate
 from typing import List
-from app.services.auth_service import AuthService
+from app.auth.password import hash_password
+
 
 
 def get_home():
@@ -88,9 +89,7 @@ def create_user(
             detail="Email already registered",
         )
 
-    hashed_password = AuthService.hash_password(
-        user.password
-    )
+    hashed_password = hash_password(user.password)
 
     created_user = user_repository.create(
         db=db,

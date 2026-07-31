@@ -1,16 +1,6 @@
-"""
-Application Settings
-
-This file loads all environment variables from the .env file.
-
-Instead of calling os.getenv() throughout the application,
-we centralize configuration in one place.
-"""
-
 import os
 from dotenv import load_dotenv
 
-# Load variables from .env file
 load_dotenv()
 
 
@@ -27,5 +17,23 @@ class Settings:
     DATABASE_USER = os.getenv("DATABASE_USER")
     DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 
-# Single shared settings object
+    # JWT SETTINGS
+    SECRET_KEY = os.getenv(
+        "SECRET_KEY",
+        "my-super-secret-key-change-this"
+    )
+
+    ALGORITHM = os.getenv(
+        "ALGORITHM",
+        "HS256"
+    )
+
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(
+        os.getenv(
+            "ACCESS_TOKEN_EXPIRE_MINUTES",
+            "60"
+        )
+    )
+
+
 settings = Settings()
