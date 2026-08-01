@@ -21,6 +21,9 @@ from app.schemas.user import (
 from app.services import api_service
 from app.services.auth_service import login
 
+from app.auth.dependencies import get_current_user
+from app.models.user import User
+
 
 # Create a router object
 router = APIRouter()
@@ -77,6 +80,19 @@ def login_user(
 ):
     return login(db, user)
 
+@router.get(
+    "/me",
+    response_model=UserResponse,
+)
+def read_current_user(
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Get the currently logged-in user.
+    """
+
+    return current_user
+
 
 @router.get(
     "/users",
@@ -84,7 +100,13 @@ def login_user(
 )
 def read_users(
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
+    """
+    Get all users.
+    Authentication required.
+    """
+
     return api_service.get_users(db)
 
 
@@ -95,8 +117,17 @@ def read_users(
 def read_user(
     user_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    return api_service.get_user_by_id(db, user_id)
+    """
+    Get a user by ID.
+    Authentication required.
+    """
+
+    return api_service.get_user_by_id(
+        db,
+        user_id,
+    )
 
 
 @router.put(
@@ -107,13 +138,31 @@ def update_existing_user(
     user_id: int,
     user: UserUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    return api_service.update_user(db, user_id, user)
+    """
+    Update a user.
+    Authentication required.
+    """
 
+    return api_service.update_user(
+        db,
+        user_id,
+        user,
+    )
 
 @router.delete("/users/{user_id}")
 def delete_existing_user(
     user_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    return api_service.delete_user(db, user_id)
+    """
+    Delete a user.
+    Authentication required.
+    """
+
+    return api_service.delete_user(
+        db,
+        user_id,
+    )
