@@ -13,7 +13,8 @@ def create(
         name=user.name,
         email=user.email,
         password=hashed_password,
-    )
+        role="user",
+)
 
     db.add(db_user)
     db.commit()

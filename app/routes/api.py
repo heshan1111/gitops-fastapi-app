@@ -6,7 +6,6 @@ This file contains all public API endpoints.
 Keeping routes in a separate file makes the project
 cleaner and easier to maintain as it grows.
 """
-
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -17,13 +16,20 @@ from app.schemas.user import (
     UserResponse,
     UserLogin,
     Token,
+    RefreshTokenRequest,
 )
 from app.services import api_service
-from app.services.auth_service import login
+from app.services.auth_service import (
+    login,
+    refresh_access_token,
+)
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import (
+    get_current_user,
+    require_admin,
+)
+
 from app.models.user import User
-
 
 # Create a router object
 router = APIRouter()
@@ -79,6 +85,23 @@ def login_user(
     db: Session = Depends(get_db),
 ):
     return login(db, user)
+
+@router.post(
+    "/refresh",
+    response_model=Token,
+)
+def refresh_token(
+    request: RefreshTokenRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Generate a new access token using a refresh token.
+    """
+
+    return refresh_access_token(
+        db,
+        request.refresh_token,
+    )
 
 @router.get(
     "/me",
@@ -155,13 +178,8 @@ def update_existing_user(
 def delete_existing_user(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    admin: User = Depends(require_admin),
 ):
-    """
-    Delete a user.
-    Authentication required.
-    """
-
     return api_service.delete_user(
         db,
         user_id,
